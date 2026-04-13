@@ -1,0 +1,95 @@
+{
+    "name": "analyses",
+    "type": "object",
+    "required": [
+      "imageName",
+      "imageUrl",
+      "analysisType",
+      "result",
+      "confidence",
+      "metadata",
+      "creator",
+      "createdAt",
+      "updatedAt"
+    ],
+    "properties": {
+      "imageName": {
+        "bsonType": "string",
+        "description": "Nom du fichier image analysé"
+      },
+      "imageUrl": {
+        "bsonType": "string",
+        "description": "URL de l'image stockée"
+      },
+      "analysisType": {
+        "bsonType": "string",
+        "enum": [
+          "signature",
+          "ai-detection",
+          "verification"
+        ],
+        "description": "Type d'analyse effectuée"
+      },
+      "result": {
+        "bsonType": "string",
+        "enum": [
+          "authentic",
+          "ai-generated",
+          "signed",
+          "unsigned",
+          "tampered"
+        ],
+        "description": "Résultat de l'analyse"
+      },
+      "confidence": {
+        "bsonType": "double",
+        "minimum": 0,
+        "maximum": 100,
+        "description": "Niveau de confiance du résultat (0-100%)"
+      },
+      "metadata": {
+        "bsonType": "object",
+        "description": "Métadonnées supplémentaires de l'analyse",
+        "properties": {
+          "signature": {
+            "bsonType": "string",
+            "description": "Signature cryptographique si applicable"
+          },
+          "algorithm": {
+            "bsonType": "string",
+            "description": "Algorithme utilisé pour l'analyse"
+          },
+          "processingTime": {
+            "bsonType": "double",
+            "description": "Temps de traitement en millisecondes"
+          },
+          "imageSize": {
+            "bsonType": "int",
+            "description": "Taille de l'image en octets"
+          },
+          "dimensions": {
+            "bsonType": "string",
+            "description": "Dimensions de l'image (ex: 1920x1080)"
+          }
+        }
+      },
+      "creator": {
+        "bsonType": "string",
+        "description": "ID de l'utilisateur créateur"
+      },
+      "creatorEmail": {
+        "bsonType": "string",
+        "description": "Creator user email"
+      },
+      "createdAt": {
+        "bsonType": "string",
+        "title": "datetime",
+        "description": "ISO 8601 datetime string (UTC): YYYY-MM-DDTHH:mm:ss.sssZ"
+      },
+      "updatedAt": {
+        "bsonType": "string",
+        "title": "datetime",
+        "description": "ISO 8601 datetime string (UTC): YYYY-MM-DDTHH:mm:ss.sssZ"
+      }
+    }
+  }
