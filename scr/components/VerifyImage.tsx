@@ -2,21 +2,39 @@ import React, { useState } from 'react'
 import { Upload, FileImage, ShieldCheck, ShieldAlert, CircleHelp } from 'lucide-react'
 import { postImageForm } from '../lib/api'
 
+const FORMAT_LABELS: Record<string, string> = {
+  jpeg: 'JPEG (photo compressée)',
+  png: 'PNG',
+  webp: 'WebP',
+  bmp: 'Bitmap',
+  unknown: 'non reconnu ou inhabituel',
+}
+
+function formatLabel(code?: string): string {
+  if (!code) return ''
+  return FORMAT_LABELS[code] ?? code.toUpperCase()
+}
+
 type VerifyResult = {
   result: 'authentic' | 'unsigned' | 'tampered'
   confidence: number
   message: string
+  guidance?: string
   payload?: {
     author?: string
     message?: string
     issuedAt?: string
     version?: string
+    userId?: number
   } | null
+  inputFormat?: string
+  formatWarnings?: string[]
 }
 
 export default function VerifyImage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string>('')
+  const [algorithm, setAlgorithm] = useState<'dct' | 'lsb'>('dct')
   const [verifying, setVerifying] = useState(false)
   const [result, setResult] = useState<VerifyResult | null>(null)
 
@@ -31,7 +49,9 @@ export default function VerifyImage() {
     if (!selectedFile) return
     setVerifying(true)
     try {
-      const verifyResult = await postImageForm<VerifyResult>('/api/verify', selectedFile)
+      const verifyResult = await postImageForm<VerifyResult>('/api/verify', selectedFile, {
+        algorithm,
+      })
       setResult(verifyResult)
     } catch (error) {
       alert(`Erreur pendant la vérification: ${String(error)}`)
@@ -52,12 +72,23 @@ export default function VerifyImage() {
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-white mb-3">Vérifier une Signature</h1>
         <p className="text-gray-300">
-          Chargez une image signée par la plateforme pour valider son authenticité.
+          Déposez la photo ou le fichier image à contrôler. Utilisez le même mode (résistant ou sensible) que lors de la signature.
         </p>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-8">
         <div>
+          <div className="mb-4">
+            <label className="block text-white font-semibold mb-2 text-sm">Mode d’analyse (comme à la signature)</label>
+            <select
+              value={algorithm}
+              onChange={(e) => setAlgorithm(e.target.value as 'dct' | 'lsb')}
+              className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:border-blue-500"
+            >
+              <option value="dct">Résistant — pour les images signées en mode résistant</option>
+              <option value="lsb">Sensible — pour les images signées en mode sensible</option>
+            </select>
+          </div>
           <div
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => {
@@ -119,11 +150,33 @@ export default function VerifyImage() {
                 ) : (
                   <CircleHelp className="w-20 h-20 text-yellow-400 mx-auto" />
                 )}
-                <h3 className="text-2xl font-bold text-white">{result.message}</h3>
-                <p className="text-gray-300">Confiance: {result.confidence}%</p>
+                <h3 className="text-2xl font-bold text-white leading-snug">{result.message}</h3>
+                {result.guidance ? (
+                  <p className="text-gray-300 text-sm text-left leading-relaxed bg-white/5 rounded-lg p-4 border border-white/10">
+                    {result.guidance}
+                  </p>
+                ) : null}
+                <p className="text-gray-400 text-sm">
+                  Indice de confiance automatique : <span className="text-gray-200">{result.confidence}%</span>
+                  {' '}(outil d’aide, pas une preuve juridique).
+                </p>
+                {result.inputFormat ? (
+                  <p className="text-gray-400 text-sm">
+                    Type de fichier détecté :{' '}
+                    <span className="text-gray-200">{formatLabel(result.inputFormat)}</span>
+                  </p>
+                ) : null}
+                {result.formatWarnings && result.formatWarnings.length > 0 ? (
+                  <ul className="text-left text-amber-200/90 text-sm list-disc pl-5 space-y-1">
+                    {result.formatWarnings.map((w, i) => (
+                      <li key={i}>{w}</li>
+                    ))}
+                  </ul>
+                ) : null}
 
                 {result.payload && (
                   <div className="bg-white/5 rounded-lg p-4 text-left text-sm text-gray-300 space-y-1">
+                    <p>Référence compte : {result.payload.userId ?? '—'}</p>
                     <p>Auteur: {result.payload.author || 'N/A'}</p>
                     <p>Message: {result.payload.message || 'N/A'}</p>
                     <p>Date: {result.payload.issuedAt || 'N/A'}</p>

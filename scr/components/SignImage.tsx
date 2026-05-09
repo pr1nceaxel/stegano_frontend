@@ -9,6 +9,8 @@ export default function SignImage() {
   const [previewUrl, setPreviewUrl] = useState<string>('')
   const [author, setAuthor] = useState<string>(user?.fullName || '')
   const [message, setMessage] = useState<string>('')
+  const [algorithm, setAlgorithm] = useState<'dct' | 'lsb'>('dct')
+  const [outputFormat, setOutputFormat] = useState<'png' | 'jpeg'>('png')
   const [processing, setProcessing] = useState(false)
   const [successInfo, setSuccessInfo] = useState<{
     filename: string
@@ -52,8 +54,11 @@ export default function SignImage() {
       const { blob, headers } = await postImageAndDownload('/api/sign', selectedFile, {
         author: author.trim(),
         message: message.trim(),
+        algorithm,
+        output_format: outputFormat,
       })
-      const signedName = selectedFile.name.replace(/\.[a-zA-Z0-9]+$/, '') + '-signed.png'
+      const ext = outputFormat === 'jpeg' ? 'jpg' : 'png'
+      const signedName = selectedFile.name.replace(/\.[a-zA-Z0-9]+$/, '') + '-signed.' + ext
       const url = window.URL.createObjectURL(blob)
       const anchor = document.createElement('a')
       anchor.href = url
@@ -134,10 +139,12 @@ export default function SignImage() {
             <div className="flex gap-3">
               <AlertCircle className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
               <div>
-                <h4 className="text-cyan-400 font-semibold mb-1">À propos de la signature</h4>
+                <h4 className="text-cyan-400 font-semibold mb-1">Comment ça marche&nbsp;?</h4>
                 <p className="text-sm text-gray-300">
-                  La signature est embarquée dans le domaine DCT avec redondance de bits.
-                  La vérification contrôle ensuite l'intégrité HMAC du payload.
+                  Votre nom et votre message sont transformés en une preuve numérique sécurisée, puis discrètement
+                  mélangés aux données de l&apos;image. Choisissez le mode <strong className="text-cyan-200">résistant</strong> pour
+                  les photos souvent partagées en JPEG, ou le mode <strong className="text-cyan-200">sensible</strong> uniquement pour des tests
+                  (très fragile si l&apos;image est recompressée).
                 </p>
               </div>
             </div>
@@ -158,6 +165,31 @@ export default function SignImage() {
             />
           </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-white font-semibold mb-3">Mode de signature</label>
+              <select
+                value={algorithm}
+                onChange={(e) => setAlgorithm(e.target.value as 'dct' | 'lsb')}
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+              >
+                <option value="dct">Résistant — conseillé pour la plupart des images (photos, JPEG)</option>
+                <option value="lsb">Sensible — uniquement pour essais (perdu si forte compression)</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-white font-semibold mb-3">Format du fichier téléchargé</label>
+              <select
+                value={outputFormat}
+                onChange={(e) => setOutputFormat(e.target.value as 'png' | 'jpeg')}
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+              >
+                <option value="png">PNG — qualité maximale (recommandé avec le mode sensible)</option>
+                <option value="jpeg">JPEG — comme une photo classique (léger flou possible)</option>
+              </select>
+            </div>
+          </div>
+
           <div>
             <label className="block text-white font-semibold mb-3">
               Message de signature (optionnel)
@@ -172,29 +204,6 @@ export default function SignImage() {
             <p className="text-sm text-gray-400 mt-2">
               Maximum 500 caractères
             </p>
-          </div>
-
-          <div>
-            <label className="block text-white font-semibold mb-3">
-              Options de Sécurité
-            </label>
-            <div className="space-y-3">
-              <label className="flex items-center gap-3 p-4 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-all cursor-pointer">
-                <input type="checkbox" className="w-5 h-5 text-cyan-500 rounded" defaultChecked />
-                <div>
-                  <div className="text-white font-medium">Chiffrement fort</div>
-                  <div className="text-sm text-gray-400">Utiliser AES-256</div>
-                </div>
-              </label>
-
-              <label className="flex items-center gap-3 p-4 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-all cursor-pointer">
-                <input type="checkbox" className="w-5 h-5 text-cyan-500 rounded" defaultChecked />
-                <div>
-                  <div className="text-white font-medium">Résistance compression</div>
-                  <div className="text-sm text-gray-400">Optimiser contre JPEG</div>
-                </div>
-              </label>
-            </div>
           </div>
 
           <button
@@ -233,9 +242,11 @@ export default function SignImage() {
                 <CheckCircle className="w-4 h-4" />
                 Signature terminée
               </div>
-              <p>Fichier généré: {successInfo.filename}</p>
-              <p>Algorithme: {successInfo.algorithm}</p>
-              <p className="text-gray-400">Le fichier signé a été téléchargé automatiquement.</p>
+              <p>Fichier enregistré sur votre ordinateur : {successInfo.filename}</p>
+              <p className="text-gray-400">
+                Détail technique (méthode d’insertion) : {successInfo.algorithm}
+              </p>
+              <p className="text-gray-400">Si le téléchargement ne démarre pas, vérifiez les bloqueurs de fenêtres du navigateur.</p>
             </div>
           )}
         </div>

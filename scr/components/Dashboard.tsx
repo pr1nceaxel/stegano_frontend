@@ -140,9 +140,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="mt-8 bg-green-500/10 border border-green-500/30 rounded-lg p-4 text-sm text-gray-300">
-        Backend actif: historique chargé depuis l'API (`/api/analyses`) et stocké en SQLite.
-      </div>
     </div>
   )
 }
