@@ -11,6 +11,8 @@ export default function DetectAI() {
     confidence: number
     details: string
     signals?: Record<string, number>
+    modelVersion?: string
+    deepClassifierStatus?: string
   } | null>(null)
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,6 +48,8 @@ export default function DetectAI() {
         confidence: number
         details: string
         signals: Record<string, number>
+        modelVersion?: string
+        deepClassifierStatus?: string
       }>('/api/detect-ai', selectedFile)
       setResult(apiResult)
     } catch (error) {
@@ -177,6 +181,12 @@ export default function DetectAI() {
                     {result.isAI ? 'Image Générée par IA' : 'Image Authentique'}
                   </h3>
                   <p className="text-gray-300">{result.details}</p>
+                  {result.modelVersion ? (
+                    <p className="text-gray-500 text-sm mt-2">Modèle / pipeline: {result.modelVersion}</p>
+                  ) : null}
+                  {result.deepClassifierStatus ? (
+                    <p className="text-amber-200/80 text-sm mt-2 text-left">{result.deepClassifierStatus}</p>
+                  ) : null}
                 </div>
 
                 <div className="bg-white/5 rounded-lg p-6">
