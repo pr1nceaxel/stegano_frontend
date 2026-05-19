@@ -106,3 +106,15 @@ export async function postImageAndDownload(
   }
   return { blob: await response.blob(), headers: response.headers }
 }
+
+export async function fetchBlob(endpoint: string): Promise<Blob | null> {
+  const response = await fetch(`${apiBaseUrl}${endpoint}`, {
+    headers: {
+      ...authHeaders(),
+    },
+  })
+  if (!response.ok) {
+    return null
+  }
+  return response.blob()
+}

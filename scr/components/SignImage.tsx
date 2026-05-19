@@ -173,8 +173,8 @@ export default function SignImage() {
                 onChange={(e) => setAlgorithm(e.target.value as 'dct' | 'lsb')}
                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
               >
-                <option value="dct">Résistant — conseillé pour la plupart des images (photos, JPEG)</option>
-                <option value="lsb">Sensible — uniquement pour essais (perdu si forte compression)</option>
+                <option className="text-black" value="dct">Résistant — conseillé pour la plupart des images (photos, JPEG)</option>
+                <option className="text-black" value="lsb">Sensible — uniquement pour essais (perdu si forte compression)</option>
               </select>
             </div>
             <div>
@@ -184,8 +184,8 @@ export default function SignImage() {
                 onChange={(e) => setOutputFormat(e.target.value as 'png' | 'jpeg')}
                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
               >
-                <option value="png">PNG — qualité maximale (recommandé avec le mode sensible)</option>
-                <option value="jpeg">JPEG — comme une photo classique (léger flou possible)</option>
+                <option className="text-black" value="png">PNG — qualité maximale (recommandé avec le mode sensible)</option>
+                <option className="text-black" value="jpeg">JPEG — comme une photo classique (léger flou possible)</option>
               </select>
             </div>
           </div>

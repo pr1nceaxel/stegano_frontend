@@ -85,8 +85,8 @@ export default function VerifyImage() {
               onChange={(e) => setAlgorithm(e.target.value as 'dct' | 'lsb')}
               className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:border-blue-500"
             >
-              <option value="dct">Résistant — pour les images signées en mode résistant</option>
-              <option value="lsb">Sensible — pour les images signées en mode sensible</option>
+              <option className="text-black" value="dct">Résistant — pour les images signées en mode résistant</option>
+              <option className="text-black" value="lsb">Sensible — pour les images signées en mode sensible</option>
             </select>
           </div>
           <div

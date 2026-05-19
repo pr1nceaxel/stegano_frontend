@@ -9,6 +9,7 @@ export interface Analysis {
   confidence: number
   metadata: Record<string, unknown>
   createdAt: string
+  hasPreview?: boolean
 }
 
 export interface AnalysisStats {
@@ -33,7 +34,7 @@ export function useAnalyses() {
   }) => {
     setLoading(true)
     try {
-      const limit = options?.limit ?? 50
+      const limit = options?.limit ?? 200
       const payload = await fetchJson<Array<{
         id: number
         imageName: string
@@ -42,10 +43,12 @@ export function useAnalyses() {
         confidence: number
         metadata: Record<string, unknown>
         createdAt: string
+        hasPreview?: boolean
       }>>(`/api/analyses?limit=${limit}`)
       const list: Analysis[] = payload.map((item) => ({
         ...item,
         id: String(item.id),
+        hasPreview: Boolean(item.hasPreview),
       }))
 
       setAnalyses(list)
